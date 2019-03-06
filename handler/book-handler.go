@@ -37,7 +37,9 @@ func CreateBook(bookId int) {
 	}
 	chapters, err := chapter.AllByBookId()
 	for _, c := range chapters {
+		title := "#第" + strconv.Itoa(c.Num) + "章 " + c.Title
+		log.Println(title)
 		//*[re:test(., "^\s*[第卷][0123456789一二三四五六七八九十零〇百千两]*[章回部节集卷].*", "i")]
-		WriteFile(book.Name, "第"+strconv.Itoa(c.Num)+"章 "+c.Title+"\n"+c.Content+"\n")
+		WriteFile(book.Name, title+"\n"+c.Content+"\n")
 	}
 }

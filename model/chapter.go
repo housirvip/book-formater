@@ -1,6 +1,8 @@
 package model
 
-import "errors"
+import (
+	"errors"
+)
 
 type Chapter struct {
 	Id      int `xorm:"pk autoincr"`
@@ -25,7 +27,7 @@ func (c *Chapter) OneById() error {
 func (c *Chapter) AllByBookId() ([]Chapter, error) {
 
 	var cs []Chapter
-	err := orm.Where("book_id = ?", c.BookId).Find(&cs)
+	err := orm.Where("book_id = ?", c.BookId).Asc("num").Find(&cs)
 	if err != nil {
 		return nil, err
 	}
