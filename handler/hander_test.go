@@ -4,12 +4,40 @@ import (
 	"book-formater/model"
 	"log"
 	"regexp"
+	"strings"
 	"testing"
 )
 
-func TestTrimContent(t *testing.T) {
+func TestChapter(t *testing.T) {
 
-	TrimContent()
+	orm := model.Orm()
+	err := orm.Where("book_id = ?", 1).Iterate(new(model.Chapter), func(i int, bean interface{}) error {
+
+		c := bean.(*model.Chapter)
+
+		err := TrimContent(c)
+		if err != nil {
+			log.Println(err)
+		}
+
+		err = TrimTitle(c)
+		if err != nil {
+			log.Println(err)
+		}
+
+		err = c.UpdateCols("title", "content", "num")
+		if err != nil {
+			log.Println(err)
+		}
+
+		log.Println(c.Id, c.Title, c.Num)
+
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+	}
+
 }
 
 func TestWriteFile(t *testing.T) {
@@ -47,12 +75,25 @@ func Test1(t *testing.T) {
 
 func TestReadFile(t *testing.T) {
 
-	chapters := ReadFile("../book/shengzu.json")
+	book := &model.Book{
+		Name:   "圣祖",
+		Author: "傲天无痕",
+	}
+	err := book.Create()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println("book id:", book.Id)
+
+	chapters := ReadFile("../book/圣祖.json")
 	for k, v := range chapters {
-		if len(v.Content) < 50 {
-			log.Println(k, v.Title, v.Content)
-		} else {
-			log.Println(k, v.Title)
+		text := strings.Replace(v.Content, "\r\r", "\n", -1)
+		v.Content = strings.Replace(text, "\u00a0", "", -1)
+		v.BookId = book.Id
+		if err != nil {
+			log.Println(err)
 		}
+		err = v.Create()
+		log.Println(k, v.Title)
 	}
 }

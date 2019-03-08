@@ -40,8 +40,20 @@ func (c *Chapter) UpdateCols(cols ...string) error {
 	if err != nil {
 		return err
 	}
-	if ok == 0 {
+	if ok <= 0 {
 		return errors.New("error: [Chapter]-UpdateCols")
+	}
+	return nil
+}
+
+func (c *Chapter) Create() error {
+
+	ok, err := orm.InsertOne(c)
+	if err != nil {
+		return err
+	}
+	if ok <= 0 {
+		return errors.New("error: [Book]-Create")
 	}
 	return nil
 }

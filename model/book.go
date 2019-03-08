@@ -20,3 +20,15 @@ func (b *Book) OneById() error {
 	}
 	return nil
 }
+
+func (b *Book) Create() error {
+
+	ok, err := orm.InsertOne(b)
+	if err != nil {
+		return err
+	}
+	if ok <= 0 {
+		return errors.New("error: [Book]-Create")
+	}
+	return nil
+}
