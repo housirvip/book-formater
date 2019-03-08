@@ -2,6 +2,8 @@ package handler
 
 import (
 	"book-formater/model"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
@@ -20,6 +22,23 @@ func WriteFile(file, content string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func ReadFile(file string) []model.Chapter {
+
+	var chapters []model.Chapter
+
+	data, err := ioutil.ReadFile(file)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = json.Unmarshal(data, &chapters)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return chapters
 }
 
 func CreateBook(bookId int) {

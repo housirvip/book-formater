@@ -44,3 +44,15 @@ func Test1(t *testing.T) {
 	s = re1.ReplaceAllString(s, "\n")
 	log.Println(s)
 }
+
+func TestReadFile(t *testing.T) {
+
+	chapters := ReadFile("../book/shengzu.json")
+	for k, v := range chapters {
+		if len(v.Content) < 50 {
+			log.Println(k, v.Title, v.Content)
+		} else {
+			log.Println(k, v.Title)
+		}
+	}
+}
