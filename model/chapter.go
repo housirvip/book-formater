@@ -10,6 +10,7 @@ type Chapter struct {
 	Content string `xorm:"text"`
 	BookId  int
 	Num     int
+	Url     string
 }
 
 func (c *Chapter) OneById() error {

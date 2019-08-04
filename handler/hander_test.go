@@ -4,6 +4,7 @@ import (
 	"book-formater/model"
 	"log"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -20,7 +21,7 @@ func TestChapter(t *testing.T) {
 			log.Println(err)
 		}
 
-		err = TrimTitle(c)
+		err = TrimNumAndTitle(c)
 		if err != nil {
 			log.Println(err)
 		}
@@ -37,12 +38,93 @@ func TestChapter(t *testing.T) {
 	if err != nil {
 		log.Println(err)
 	}
-
 }
 
-func TestWriteFile(t *testing.T) {
+func TestTrimTitle(t *testing.T) {
 
-	WriteFile("a", "你好啊臭傻逼")
+	orm := model.Orm()
+	err := orm.Where("book_id = ?", 1).Iterate(new(model.Chapter), func(i int, bean interface{}) error {
+
+		c := bean.(*model.Chapter)
+		err := TrimTitle(c)
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println(c.Title)
+
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func TestTrimContentEnter(t *testing.T) {
+
+	orm := model.Orm()
+	err := orm.Where("book_id = ?", 1).Iterate(new(model.Chapter), func(i int, bean interface{}) error {
+
+		c := bean.(*model.Chapter)
+		re, err := regexp.Compile(`[ ]{3,}`)
+		if err != nil {
+			log.Println(err)
+		}
+		c.Content = re.ReplaceAllString(c.Content, "\n")
+		log.Println(c.Content)
+
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func TestTrimUrlAndNum(t *testing.T) {
+
+	orm := model.Orm()
+	err := orm.Where("book_id = ?", 1).Iterate(new(model.Chapter), func(i int, bean interface{}) error {
+
+		c := bean.(*model.Chapter)
+
+		c.Url = strings.Replace(c.Url, "https://www.biquke.com/bq/20/20880/", "", -1)
+		c.Url = strings.Replace(c.Url, ".html", "", -1)
+
+		var err error
+		c.Num, err = strconv.Atoi(c.Url)
+		if err != nil {
+			return err
+		}
+		log.Println(c.Num)
+
+		err = c.UpdateCols("num")
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func TestNumCount(t *testing.T) {
+
+	count := 1
+	orm := model.Orm()
+	err := orm.Where("book_id = ?", 1).Asc("num").Iterate(new(model.Chapter), func(i int, bean interface{}) error {
+
+		c := bean.(*model.Chapter)
+		for count != c.Num {
+			log.Println(count)
+			count++
+		}
+		count++
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func TestCreateBook(t *testing.T) {
@@ -76,8 +158,8 @@ func Test1(t *testing.T) {
 func TestReadFile(t *testing.T) {
 
 	book := &model.Book{
-		Name:   "圣祖",
-		Author: "傲天无痕",
+		Name:   "一世之尊",
+		Author: "爱潜水的乌贼",
 	}
 	err := book.Create()
 	if err != nil {
@@ -85,10 +167,10 @@ func TestReadFile(t *testing.T) {
 	}
 	log.Println("book id:", book.Id)
 
-	chapters := ReadFile("../book/圣祖.json")
+	chapters := ReadFile("../book/yszz.json")
 	for k, v := range chapters {
 		text := strings.Replace(v.Content, "\r\r", "\n", -1)
-		v.Content = strings.Replace(text, "\u00a0", "", -1)
+		v.Content = strings.Replace(text, "\u00a0\u00a0\u00a0\u00a0", "\n", -1)
 		v.BookId = book.Id
 		if err != nil {
 			log.Println(err)

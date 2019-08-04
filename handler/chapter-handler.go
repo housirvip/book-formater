@@ -43,6 +43,21 @@ func TrimTitle(c *model.Chapter) error {
 	}
 	c.Title = re.ReplaceAllString(src, "")
 
+	return nil
+}
+
+func TrimNumAndTitle(c *model.Chapter) error {
+
+	src := c.Title
+	if src == "" {
+		return errors.New("title src 为空")
+	}
+	re, err := regexp.Compile(`第[零一二三四五六七八九十百千0-9]+章[ \s]?`)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	c.Title = re.ReplaceAllString(src, "")
+
 	reMixNum, err := regexp.Compile(`[零一二三四五六七八九十百千0-9]+`)
 	if err != nil {
 		log.Fatalln(err)
